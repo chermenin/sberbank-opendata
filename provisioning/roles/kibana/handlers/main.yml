@@ -1,0 +1,40 @@
+---
+- name: Wait for Kibana to come up
+  shell: curl http://localhost:5601/api/status
+  register: kibana_started
+  until:
+    - "kibana_started.stdout.find('Green') != -1"
+  retries: 20
+  delay: 20
+  changed_when: false
+  listen: update kibana dashboards
+  when: not ansible_check_mode
+
+- name: Import Kibana index patterns
+  uri:
+    url: "http://localhost:5601/es_admin/.kibana/index-pattern/{{ elasticsearch_index_prefix }}*"
+    method: POST
+    body:
+      title: "{{ elasticsearch_index_prefix }}*"
+      timeFieldName: "@timestamp"
+    headers:
+      kbn-version: 5.5.2
+      Content-Type: "application/json"
+    body_format: json
+    status_code: [200, 201]
+  listen: update kibana dashboards
+  when: not ansible_check_mode
+
+- name: Import Kibana dashboards
+  uri:
+    url: "http://localhost:5601/es_admin/.kibana/{{ item._type }}/{{ item._id }}"
+    method: POST
+    body: "{{ item._source | to_json }}"
+    headers:
+      kbn-version: 5.5.2
+      Content-Type: "application/json"
+    body_format: json
+    status_code: [200, 201]
+  with_items: "{{ lookup('template', 'dashboard.json.j2', convert_data=False) | from_json }}"
+  listen: update kibana dashboards
+  when: not ansible_check_mode

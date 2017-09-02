@@ -1,0 +1,39 @@
+input {
+  kafka {
+    id => "sberbank_opendata_kafka"
+    bootstrap_servers => "localhost:9092"
+    topics => [ "{{ kafka_input_topic }}" ]
+    group_id => "sberbank_opendata_logstash"
+    client_id => "logstash"
+    auto_offset_reset => "earliest"
+    consumer_threads => "1"
+    heartbeat_interval_ms => "3000"
+    session_timeout_ms => "30000"
+    codec => "json"
+  }
+}
+
+filter {
+  csv {
+    columns => [ "metric", "region", "date", "value" ]
+    convert => { "value" => "integer" }
+  }
+  if ([metric] == "name") { drop {} }  # drop headers line
+  date {
+		match => [ "date", "yyyy-MM-dd" ]
+		tag_on_failure => "incorrect_date"
+	}
+  if ("incorrect_date" in [tags]) { drop {} }  # drop rows with incorrect date
+  mutate { remove_field => [ "offset", "beat", "input_type", "source", "message", "date" ] }
+}
+
+output {
+  elasticsearch {
+    hosts => [ "localhost:9200" ]
+    index => "{{ elasticsearch_index_prefix }}-%{+YYYY}"
+    timeout => 120
+    template => "/usr/share/logstash/config/template.json"
+    template_name => "sberbank_opendata"
+    template_overwrite => false
+  }
+}

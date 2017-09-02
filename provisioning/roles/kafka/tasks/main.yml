@@ -1,0 +1,6 @@
+---
+- name: Start Kafka
+  docker_container:
+    name: kafka
+    image: spotify/kafka
+    network_mode: host

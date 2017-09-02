@@ -1,0 +1,12 @@
+---
+- name: Include variables from file
+  hosts: all
+  tasks:
+    - include_vars:
+        file: variables.yml
+
+- name: Install requirements for Sberbank Open Data demo
+  hosts: sberbank-opendata
+  become: yes
+  roles:
+    - preinstall

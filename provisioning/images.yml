@@ -1,0 +1,15 @@
+---
+- name: Include variables from file
+  hosts: all
+  tasks:
+    - include_vars:
+        file: variables.yml
+
+- name: Provisioning for Sberbank Open Data demo
+  hosts: sberbank-opendata
+  roles:
+    - elasticsearch
+    - kafka
+    - kibana
+    - filebeat
+    - logstash

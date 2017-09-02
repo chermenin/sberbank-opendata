@@ -1,0 +1,25 @@
+filebeat:
+  prospectors:
+    - input_type: log
+      paths:
+        - /filebeat/input/*
+      document_type: sberbank_opendata
+      fields_under_root: true
+      scan_frequency: 10s
+      encoding: cp1251
+
+output.kafka:
+  hosts: ["localhost:9092"]
+  topic: "{{ kafka_input_topic }}"
+  partition.round_robin:
+    reachable_only: true
+    group_events: 100
+  version: '0.10'
+  client_id: filebeat
+  worker: 1
+  broker_timeout: 30s
+  keep_alive: 60s
+  compression: snappy
+  channel_buffer_size: 2048
+  required_acks: 1
+  flush_interval: 30s

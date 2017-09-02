@@ -1,0 +1,34 @@
+---
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Set sysctl settings for Elasticsearch
+  sysctl: name="vm.max_map_count" value="1048576" state=present sysctl_set=yes
+
+- name: Install Docker
+  yum: name=docker state=installed
+
+- name: Install docker-py
+  pip: name=docker-py
+
+- name: Create users group 'docker'
+  group:
+    name: docker
+    state: present
+
+- name: Add group 'docker' for user 'vagrant'
+  user:
+    name: vagrant
+    append: yes
+    groups: docker
+
+- name: Start Docker service
+  service: name=docker state=started enabled=true
+
+- name: Set permittions for base directory
+  file:
+    path: "{{ base_dir }}"
+    owner: vagrant
+    group: vagrant
+    mode: 0755

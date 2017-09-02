@@ -1,0 +1,16 @@
+---
+- name: Create directory for Filebeat configuration
+  file: path="{{ filebeat_conf_dir }}" state=directory mode=755
+
+- name: Copy configuration file
+  template: src=filebeat.yml.j2 dest={{ filebeat_conf_dir }}/filebeat.yml mode=644
+
+- name: Start Filebeat
+  docker_container:
+    name: filebeat
+    image: docker.elastic.co/beats/filebeat:5.5.2
+    network_mode: host
+    volumes:
+      - "{{ filebeat_conf_dir }}:/filebeat/configuration:ro"
+      - "{{ filebeat_input_dir }}:/filebeat/input:ro"
+    command: "filebeat -e -c /filebeat/configuration/filebeat.yml"

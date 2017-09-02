@@ -1,0 +1,19 @@
+---
+- name: Create directory for Logstash configuration
+  file: path="{{ logstash_conf_dir }}" state=directory mode=755
+
+- name: Copy configuration files
+  template: src={{ item }}.j2 dest={{ logstash_conf_dir }}/{{ item }} mode=644
+  with_items:
+    - "logstash.conf"
+    - "logstash.yml"
+    - "template.json"
+
+- name: Start Logstash
+  docker_container:
+    name: logstash
+    image: docker.elastic.co/logstash/logstash:5.5.2
+    network_mode: host
+    volumes:
+      - "{{ logstash_conf_dir }}:/usr/share/logstash/config:ro"
+    command: "logstash -f /usr/share/logstash/config/logstash.conf"

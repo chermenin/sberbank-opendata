@@ -1,0 +1,34 @@
+{
+  "order": 0,
+  "template": "{{ elasticsearch_index_prefix }}*",
+  "mappings": {
+    "sberbank_opendata": {
+      "_all": { "enabled": false },
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "metric": { "type": "keyword" },
+        "region": { "type": "keyword" },
+        "value": { "type": "long" }
+      },
+      "dynamic_templates": [
+        {
+          "no_index": {
+            "match_pattern": "regex",
+            "path_match": "^(@version|type)$",
+            "mapping": {
+              "type": "keyword",
+              "index": false,
+              "doc_values": false
+            }
+          }
+        },
+        {
+          "text_keyword_fields": {
+            "match": "*",
+            "mapping": { "type": "keyword" }
+          }
+        }
+      ]
+    }
+  }
+}

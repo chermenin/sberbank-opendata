@@ -1,0 +1,19 @@
+---
+
+base_dir: /home/vagrant/opendata
+
+# Filebeat
+filebeat_input_dir: "{{ base_dir }}/input"
+filebeat_conf_dir: "{{ base_dir }}/filebeat"
+
+# Logstash
+logstash_conf_dir: "{{ base_dir }}/logstash"
+
+# Kibana
+kibana_conf_dir: "{{ base_dir }}/kibana"
+
+# Index prefix
+elasticsearch_index_prefix: sberbank_opendata_index
+
+# Kafka topic
+kafka_input_topic: sberbank_opendata_topic

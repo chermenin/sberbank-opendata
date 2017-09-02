@@ -1,0 +1,13 @@
+---
+- name: Start Kibana
+  docker_container:
+    name: kibana
+    image: docker.elastic.co/kibana/kibana:5.5.2
+    network_mode: host
+    ulimits:
+      - "nofile:131071:131071"
+      - "memlock:-1:-1"
+    env:
+      ELASTICSEARCH_URL: http://localhost:9200
+      xpack.security.enabled: "false"
+  notify: update kibana dashboards
